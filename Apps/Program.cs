@@ -1,7 +1,9 @@
 
 using Apps.Configs;
 using Apps.Models.Context;
+using Apps.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,12 @@ builder.Services.AddDbContext<DataDbContext>(options =>
 {
     options.UseMySql(appConfig.MariaDbConnectionString, ServerVersion.AutoDetect(appConfig.MariaDbConnectionString));
 });
+
+//Config Automapper
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+//Config Dependency Injection
+builder.Services.AddScoped<ICrudService, CrudService>();
 
 //Config Controller
 builder.Services.AddControllers();
