@@ -1,0 +1,59 @@
+
+version: '3.4'
+
+services:
+  db:
+    image: mariadb
+    container_name: mariadb-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Admin_123
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: user
+      MYSQL_PASSWORD: Admin_123
+    volumes:
+      - mariadbvolume:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+    - appnetwork
+
+  rabbitmq:
+   image: rabbitmq:3-management
+   container_name: rabbitmq-container
+   restart: always
+   ports:
+    - 5672:5672
+    - 15672:15672
+   volumes:
+    - rabbitvolume:/var/lib/rabbitmq
+   networks:
+    - appnetwork
+  
+  apps:
+    image: apps
+    container_name: apps-container
+    restart: always
+    build:
+      context: .
+      dockerfile: Apps/Dockerfile
+    ports:
+      - 5011:5011
+    environment:
+      - MariaDbConnectionString=server=db;port=3306;database=mydatabase;user=root;password=Admin_123
+      - RabbiHost=amqp://guest:guest@rabbitmq:5672
+      - RabbitQueue=qtest1
+      - TotalShowPage=20
+    networks:
+    - appnetwork
+    depends_on:
+      - db
+      - rabbitmq
+
+networks:
+ appnetwork:
+  driver: bridge
+
+volumes:
+  rabbitvolume: null
+  mariadbvolume: null

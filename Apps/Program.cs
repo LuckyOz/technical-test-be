@@ -69,6 +69,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+//Apply MigrateDb
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DataDbContext>();
+    db.Database.Migrate();
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
