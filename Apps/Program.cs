@@ -3,6 +3,7 @@ using Apps.Configs;
 using Apps.Models.Context;
 using Apps.Services;
 using FluentValidation.AspNetCore;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -24,11 +25,30 @@ builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 //Config Dependency Injection
 builder.Services.AddScoped<ICrudService, CrudService>();
+builder.Services.AddScoped<ICrudRabbitService, CrudRabbitService>();
 
 //Confgi Filter Validation
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
+});
+
+//Config Masstransit
+builder.Services.AddMassTransit(config => {
+
+    config.AddConsumer<WorkerService>();
+
+    config.UsingRabbitMq((ctx, cfg) => {
+        cfg.Host(appConfig.RabbiHost);
+
+        cfg.ReceiveEndpoint(appConfig.RabbitQueue!, c => {
+            c.ConfigureConsumer<WorkerService>(ctx);
+        });
+
+        cfg.PrefetchCount = 1;
+        cfg.ConcurrentMessageLimit = 1;
+    });
+
 });
 
 //Config Controller

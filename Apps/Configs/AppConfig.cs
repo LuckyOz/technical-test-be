@@ -4,5 +4,7 @@
     {
         public string? MariaDbConnectionString { get; set; }
         public int TotalShowPage { get; set; }
+        public string? RabbiHost { get; set; }
+        public string? RabbitQueue { get; set; }
     }
 }
