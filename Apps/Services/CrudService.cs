@@ -1,5 +1,6 @@
 ﻿using Apps.Models.Context;
 using Apps.Models.Db;
+using Apps.Models.Request;
 using Apps.Models.Response;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace Apps.Services
     {
         Task<(List<CrudResponse>, bool, string)> GetListData();
         Task<(CrudResponse, bool, string)> GetDataById(int id);
+        Task<(CrudResponse, bool, string)> AddData(PostCrudRequest dataRequest);
     }
 
     public class CrudService : ICrudService
@@ -54,6 +56,26 @@ namespace Apps.Services
             } catch (Exception ex)
             {
                 return (new CrudResponse(), false, ex.Message);
+            }
+        }
+
+        public async Task<(CrudResponse, bool, string)> AddData(PostCrudRequest dataRequest)
+        {
+            try
+            {
+                Test01 dataInsert = _mapper.Map<Test01>(dataRequest);
+                dataInsert.Created = DateTime.UtcNow;
+
+                _dataDbContext.Test01.Add(dataInsert);
+                await _dataDbContext.SaveChangesAsync();
+
+                var(data, dataStatus, dataMsg) = await GetDataById(dataInsert.Id);
+
+                return (data, dataStatus, dataMsg);
+
+            } catch (Exception ex)
+            {
+                return (new CrudResponse(), false, $"Failed Add Data, {ex.Message}");
             }
         }
     }

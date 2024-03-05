@@ -2,6 +2,8 @@
 using Apps.Configs;
 using Apps.Models.Context;
 using Apps.Services;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -23,8 +25,22 @@ builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 //Config Dependency Injection
 builder.Services.AddScoped<ICrudService, CrudService>();
 
+//Confgi Filter Validation
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 //Config Controller
-builder.Services.AddControllers();
+builder.Services.AddControllers(option =>
+{
+    option.Filters.Add(typeof(ValidateModelResponse));
+}).AddFluentValidation(v =>
+{
+    v.ImplicitlyValidateChildProperties = true;
+    v.ImplicitlyValidateRootCollectionElements = true;
+    v.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+});
 
 //Config Swagger
 builder.Services.AddEndpointsApiExplorer();

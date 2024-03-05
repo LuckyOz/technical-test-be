@@ -1,5 +1,6 @@
 ﻿
 using Apps.Models.Db;
+using Apps.Models.Request;
 using Apps.Models.Response;
 using AutoMapper;
 
@@ -10,6 +11,7 @@ namespace Apps.Configs
         public AutoMapperProfile()
         {
             CreateMap<Test01, CrudResponse>();
+            CreateMap<PostCrudRequest, Test01>();
         }
     }
 }
