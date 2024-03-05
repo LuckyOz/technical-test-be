@@ -19,8 +19,8 @@ namespace Apps.Controllers.v1
             _appConfig = appConfig;
         }
 
-        [HttpGet("get_list")]
-        public async Task<ActionResult<ServiceResponse<List<CrudResponse>>>> GetList(int? page)
+        [HttpGet("get_data_list")]
+        public async Task<ActionResult<ServiceResponse<List<CrudResponse>>>> GetDataList(int? page)
         {
             int pageCount = 1, pageSet = 1;
 
@@ -33,14 +33,14 @@ namespace Apps.Controllers.v1
                     Message = dataMessage,
                     Success = false
                 });
-            
+
             if (data is not null && data.Count > 0)
             {
                 page ??= 1;
                 var pageCountCek = Math.Ceiling((decimal)data.Count / (decimal)_appConfig.Value.TotalShowPage);
 
                 data = data.Skip(((int)page - 1) * _appConfig.Value.TotalShowPage!).Take(_appConfig.Value.TotalShowPage).ToList();
-                
+
                 pageSet = (int)page;
                 pageCount = (int)pageCountCek;
             }
@@ -50,6 +50,24 @@ namespace Apps.Controllers.v1
                 Data = data,
                 Pages = pageSet,
                 TotalPages = pageCount
+            });
+        }
+
+        [HttpGet("get_data_id/{id}")]
+        public async Task<ActionResult<ServiceResponse<CrudResponse>>> GetDataById(int id)
+        {
+            var (data, dataStatus, dataMessage) = await _crudService.GetDataById(id);
+
+            if (!dataStatus)
+                return NotFound(new ServiceResponse<CrudResponse>()
+                {
+                    Message = dataMessage,
+                    Success = false,
+                });
+
+            return Ok(new ServiceResponse<CrudResponse>()
+            {
+                Data = data,
             });
         }
     }
