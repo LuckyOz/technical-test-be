@@ -13,6 +13,7 @@ namespace Apps.Services
         Task<(CrudResponse, bool, string)> GetDataById(int id);
         Task<(CrudResponse, bool, string)> AddData(PostCrudRequest dataRequest);
         Task<(CrudResponse, bool, string)> EditData(PutCrudRequest dataRequest);
+        Task<(bool, string)> DeleteData(int id);
     }
 
     public class CrudService : ICrudService
@@ -102,6 +103,26 @@ namespace Apps.Services
             } catch (Exception ex)
             {
                 return (new CrudResponse(), false, $"Failed Edit Data, {ex.Message}");
+            }
+        }
+
+        public async Task<(bool, string)> DeleteData(int id)
+        {
+            try
+            {
+                Test01? cekDataDb = await _dataDbContext.Test01.FirstOrDefaultAsync(q => q.Id == id);
+
+                if (cekDataDb is null)
+                    return (false, $"Failed Delete Data, No Have Data with Id {id}");
+
+                _dataDbContext.Remove(cekDataDb);
+                await _dataDbContext.SaveChangesAsync();
+
+                return (true, "SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Failed Delete Data, {ex.Message}");
             }
         }
     }

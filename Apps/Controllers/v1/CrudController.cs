@@ -107,5 +107,23 @@ namespace Apps.Controllers.v1
                 Data = data,
             });
         }
+
+        [HttpDelete("delete_data/{id}")]
+        public async Task<ActionResult<ServiceResponse<string>>> DeleteData(int id)
+        {
+            var (dataStatus, dataMessage) = await _crudService.DeleteData(id);
+
+            if (!dataStatus)
+                return NotFound(new ServiceResponse<string>()
+                {
+                    Message = dataMessage,
+                    Success = false,
+                });
+
+            return Ok(new ServiceResponse<string>()
+            {
+                Data = "Success Delete Data !!",
+            });
+        }
     }
 }
