@@ -3,7 +3,9 @@ using Apps.Models.Request;
 using Apps.Models.Response;
 using Apps.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace Apps.Controllers.v1
 {
@@ -13,11 +15,13 @@ namespace Apps.Controllers.v1
     {
         private readonly ICrudService _crudService;
         private readonly IOptions<AppConfig> _appConfig;
+        private readonly ILogger<CrudController> _logger;
 
-        public CrudController(ICrudService crudService, IOptions<AppConfig> appConfig)
+        public CrudController(ICrudService crudService, IOptions<AppConfig> appConfig, ILogger<CrudController> logger)
         {
             _crudService = crudService;
             _appConfig = appConfig;
+            _logger = logger;
         }
 
         [HttpGet("get_data_list")]
@@ -78,11 +82,17 @@ namespace Apps.Controllers.v1
             var (data, dataStatus, dataMessage) = await _crudService.AddData(dataRequest);
 
             if (!dataStatus)
+            {
+                _logger.LogError($"Error Add Data, {dataMessage}, Request : {JsonConvert.SerializeObject(dataRequest)}");
+
                 return NotFound(new ServiceResponse<CrudResponse>()
                 {
                     Message = dataMessage,
                     Success = false,
                 });
+            }
+
+            _logger.LogInformation($"Success Add Data, Request : {JsonConvert.SerializeObject(dataRequest)}");
 
             return Ok(new ServiceResponse<CrudResponse>()
             {
@@ -96,11 +106,17 @@ namespace Apps.Controllers.v1
             var (data, dataStatus, dataMessage) = await _crudService.EditData(dataRequest);
 
             if (!dataStatus)
+            {
+                _logger.LogError($"Error Edit Data, {dataMessage}, Request : {JsonConvert.SerializeObject(dataRequest)}");
+
                 return NotFound(new ServiceResponse<CrudResponse>()
                 {
                     Message = dataMessage,
                     Success = false,
                 });
+            }
+
+            _logger.LogInformation($"Success Edit Data, Request : {JsonConvert.SerializeObject(dataRequest)}");
 
             return Ok(new ServiceResponse<CrudResponse>()
             {
@@ -114,11 +130,17 @@ namespace Apps.Controllers.v1
             var (dataStatus, dataMessage) = await _crudService.DeleteData(id);
 
             if (!dataStatus)
+            {
+                _logger.LogError($"Error Delete Data, {dataMessage}, Request : {id}");
+
                 return NotFound(new ServiceResponse<string>()
                 {
                     Message = dataMessage,
                     Success = false,
                 });
+            }
+
+            _logger.LogInformation($"Success Delete Data, Request : {id}");
 
             return Ok(new ServiceResponse<string>()
             {

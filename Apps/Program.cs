@@ -6,6 +6,7 @@ using FluentValidation.AspNetCore;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,7 +40,7 @@ builder.Services.AddMassTransit(config => {
     config.AddConsumer<WorkerService>();
 
     config.UsingRabbitMq((ctx, cfg) => {
-        cfg.Host(appConfig.RabbiHost);
+        cfg.Host(appConfig!.RabbiHost);
 
         cfg.ReceiveEndpoint(appConfig.RabbitQueue!, c => {
             c.ConfigureConsumer<WorkerService>(ctx);
