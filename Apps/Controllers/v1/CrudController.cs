@@ -89,5 +89,23 @@ namespace Apps.Controllers.v1
                 Data = data,
             });
         }
+
+        [HttpPut("edit_data")]
+        public async Task<ActionResult<ServiceResponse<CrudResponse>>> EditData(PutCrudRequest dataRequest)
+        {
+            var (data, dataStatus, dataMessage) = await _crudService.EditData(dataRequest);
+
+            if (!dataStatus)
+                return NotFound(new ServiceResponse<CrudResponse>()
+                {
+                    Message = dataMessage,
+                    Success = false,
+                });
+
+            return Ok(new ServiceResponse<CrudResponse>()
+            {
+                Data = data,
+            });
+        }
     }
 }

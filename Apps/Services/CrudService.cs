@@ -12,6 +12,7 @@ namespace Apps.Services
         Task<(List<CrudResponse>, bool, string)> GetListData();
         Task<(CrudResponse, bool, string)> GetDataById(int id);
         Task<(CrudResponse, bool, string)> AddData(PostCrudRequest dataRequest);
+        Task<(CrudResponse, bool, string)> EditData(PutCrudRequest dataRequest);
     }
 
     public class CrudService : ICrudService
@@ -76,6 +77,31 @@ namespace Apps.Services
             } catch (Exception ex)
             {
                 return (new CrudResponse(), false, $"Failed Add Data, {ex.Message}");
+            }
+        }
+
+        public async Task<(CrudResponse, bool, string)> EditData(PutCrudRequest dataRequest)
+        {
+            try
+            {
+                Test01? cekDataDb = await _dataDbContext.Test01.FirstOrDefaultAsync(q => q.Id == dataRequest.Id);
+
+                if (cekDataDb is null)
+                    return (new CrudResponse(), false, $"Failed Edit Data, No Have Data with Id {dataRequest.Id}");
+
+                cekDataDb.Status = dataRequest.Status;
+                cekDataDb.Nama = dataRequest.Nama;
+                cekDataDb.Updated = DateTime.UtcNow;
+
+                await _dataDbContext.SaveChangesAsync();
+
+                var (data, dataStatus, dataMsg) = await GetDataById(dataRequest.Id);
+
+                return (data, dataStatus, dataMsg);
+
+            } catch (Exception ex)
+            {
+                return (new CrudResponse(), false, $"Failed Edit Data, {ex.Message}");
             }
         }
     }
